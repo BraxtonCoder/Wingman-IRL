@@ -1,0 +1,84 @@
+# Node / Yarn / NPM
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# package-lock.json # Usually committed, but can be ignored if desired by team
+# yarn.lock # Usually committed
+
+# Expo specific
+.expo/
+web-build/
+dist/
+
+# iOS build artifacts
+# build/ # Often overlaps with Android, be specific if needed
+# DerivedData/ # Often overlaps with Android, be specific if needed
+*.xcuserdatad/
+*.xccheckout
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+
+# Android build artifacts
+.idea/ # Android Studio specific
+.gradle/
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+android/build/
+app/build/
+
+# Metro Bundler cache/artifacts
+*.generated.js
+
+# Temporary files from various editors/processes
+*.orig
+*.rej
+*.swo
+*.swp
+*.bak
+
+# OS generated files (macOS, Windows)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE / Editor specific configurations (Visual Studio Code example)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Environment variables (NEVER commit .env files with actual secrets)
+.env
+.env.*
+!.env.example # It's good practice to commit an example env file
+
+# Test runner artifacts
+coverage/
+.nyc_output/
+
+# Build outputs / Bundles - be careful if your source dirs are named this
+# /dist
+# /build
+# /public
+
+# Sensitive credential files
+*.jks
+*.p12
+*.key
+*.pem
+*.cer
+*.pfx
+*.mobileprovision
+
+# Logs
+*.log
+logs/ 

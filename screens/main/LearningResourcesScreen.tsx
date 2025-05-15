@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 
 const learningContent = [
   { id: '1', title: 'Top 5 Conversation Starters', type: 'article' },
@@ -18,7 +18,7 @@ const LearningResourcesScreen = ({ navigation }: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.screenContainer}>
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Learning & Resources</Text>
         {learningContent.map(item => (
@@ -28,12 +28,12 @@ const LearningResourcesScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  screenContainer: {
     flex: 1,
     backgroundColor: '#1a1a1a',
   },

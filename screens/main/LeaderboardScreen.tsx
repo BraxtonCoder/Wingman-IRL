@@ -45,10 +45,10 @@ const LeaderboardScreen = () => {
 
   const FilterButton = ({ title, value }: { title: string, value: string }) => (
     <TouchableOpacity 
-      style={[styles.filterButton, filter === value && styles.activeFilterButton]}
+      style={[styles.filterButton, filter === value && styles.filterButtonActive]}
       onPress={() => setFilter(value)}
     >
-      <Text style={[styles.filterButtonText, filter === value && styles.activeFilterButtonText]}>{title}</Text>
+      <Text style={[styles.filterButtonText, filter === value && styles.filterButtonTextActive]}>{title}</Text>
     </TouchableOpacity>
   );
 
@@ -103,14 +103,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#333',
   },
-  activeFilterButton: {
-    backgroundColor: '#007bff',
+  filterButtonActive: {
+    backgroundColor: '#ffffff',
   },
   filterButtonText: {
     color: '#ffffff',
   },
-  activeFilterButtonText:{
-    fontWeight: 'bold',
+  filterButtonTextActive: {
+    color: '#000000', // Black text for contrast on white
   },
   entry: {
     flexDirection: 'row',
@@ -128,19 +128,18 @@ const styles = StyleSheet.create({
   },
   rank: {
     fontSize: 16,
-    color: '#cccccc',
+    color: '#ffffff',
     fontWeight: 'bold',
-    minWidth: 30,
+    marginRight: 10,
   },
   username: {
     fontSize: 16,
-    color: '#ffffff',
+    color: '#dddddd',
     flex: 1,
-    fontWeight: '500',
   },
   score: {
     fontSize: 16,
-    color: '#4CAF50',
+    color: '#ffffff',
     fontWeight: 'bold',
   },
   emptyText: {
@@ -155,6 +154,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 15,
     fontStyle: 'italic',
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+    alignItems: 'center',
   },
 });
 

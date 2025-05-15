@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, TextInput, Button, StyleSheet, FlatList, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Message {
   id: string;
@@ -38,7 +38,8 @@ const AICoachScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    // <SafeAreaView style={styles.safeArea}> // Changed to View
+    <View style={styles.screenContainer}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingViewContainer}
@@ -65,18 +66,25 @@ const AICoachScreen = () => {
             style={styles.input}
             value={inputText}
             onChangeText={setInputText}
-            placeholder="Ask your AI Coach..."
+            placeholder="Type your message..."
             placeholderTextColor="#888"
+            multiline
           />
-          <Button title="Send" onPress={handleSend} />
+          <TouchableOpacity onPress={handleSend} style={styles.sendButtonContainer}>
+            <View style={styles.sendButton}>
+              <Text style={styles.sendButtonText}>Send</Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
+    // </SafeAreaView> // Changed to View
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  // safeArea: { // Renamed to screenContainer
+  screenContainer: {
     flex: 1,
     backgroundColor: '#1a1a1a',
   },
@@ -135,6 +143,22 @@ const styles = StyleSheet.create({
     marginRight: 10,
     color: '#ffffff',
     backgroundColor: '#2c2c2c',
+  },
+  sendButtonContainer: {
+    marginLeft: 10,
+  },
+  sendButton: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonText: {
+    color: '#000000',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 

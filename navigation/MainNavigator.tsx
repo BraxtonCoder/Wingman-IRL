@@ -75,7 +75,7 @@ const MainNavigator = () => {
     <Tab.Navigator
       screenOptions={({ route, navigation }) => ({
         // headerShown: false, // We are now providing a custom header for each tab screen
-        tabBarActiveTintColor: '#007bff',
+        tabBarActiveTintColor: '#ffffff',
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: { backgroundColor: '#1c1c1c', borderTopColor: '#333' },
         tabBarIcon: ({ focused, color, size }) => {

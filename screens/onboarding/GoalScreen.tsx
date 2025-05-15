@@ -212,7 +212,12 @@ const styles = StyleSheet.create({
   optionButtonTextSelected: {
     color: '#ffffff', 
     fontWeight: 'bold',
-  }
+  },
+  nextButton: {
+    marginTop: 20,
+    backgroundColor: '#ffffff',
+    paddingVertical: 15,
+  },
 });
 
 export default GoalScreen; 

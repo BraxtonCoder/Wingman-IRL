@@ -205,6 +205,11 @@ const styles = StyleSheet.create({
     borderColor: '#444',
     marginTop: 10,
   },
+  nextButton: {
+    marginTop: 20,
+    backgroundColor: '#ffffff',
+    paddingVertical: 15,
+  },
 });
 
 export default CommitmentScreen; 

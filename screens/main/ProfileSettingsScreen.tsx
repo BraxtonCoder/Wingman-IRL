@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 
 // TODO: Fetch user data (username, email, subscription status, goals) from Firestore
 
@@ -25,7 +25,8 @@ const ProfileSettingsScreen = ({ navigation }: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    // <SafeAreaView style={styles.safeArea}> // Changed to View
+    <View style={styles.screenContainer}>
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Profile & Settings</Text>
 
@@ -71,12 +72,13 @@ const ProfileSettingsScreen = ({ navigation }: any) => {
           <Button title="Logout" onPress={handleLogout} color="#ff3b30" />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  // safeArea: { // Renamed to screenContainer
+  screenContainer: {
     flex: 1,
     backgroundColor: '#1a1a1a',
   },
@@ -117,8 +119,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   button: {
-    backgroundColor: '#007bff',
-    padding: 12,
+    backgroundColor: '#ffffff',
+    padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,

@@ -37,3 +37,180 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+build/
+.gradle/
+*/build/
+
+# iOS
+build/
+DerivedData/
+*.ipa
+*.xcarchive
+*.xcuserdatad/
+*.xccheckout
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+
+# Other
+.DS_Store
+Thumbs.db
+*.log
+
+# Secrets (ensure you don't commit any sensitive files)
+# .env
+# secrets.js
+
+# IDE files
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+
+# Node / Yarn / NPM
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# package-lock.json # Usually committed, but can be ignored if desired by team
+# yarn.lock # Usually committed
+
+# Metro Bundler
+*.generated.js
+
+# Temporary files
+*.orig
+*.rej
+*.swo
+*.swp
+*.bak
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE / Editor specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-project
+*.sublime-workspace
+
+# Environment variables (NEVER commit .env files with secrets)
+.env
+.env.*
+!.env.example
+
+# Jest coverage reports
+coverage/
+
+# Misc
+*.jks
+*.p12
+*.key
+*.mobileprovision
+
+# Expo specific
+.expo/
+web-build/
+dist/
+
+# iOS build artifacts
+build/
+DerivedData/
+*.xcuserdatad/
+*.xccheckout
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+
+# Android build artifacts
+.idea/ # Android Studio specific
+.gradle/
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+*/build/ # Catches all build folders within Android structure
+
+# Metro Bundler cache/artifacts
+*.generated.js
+
+# Temporary files from various editors/processes
+*.orig
+*.rej
+*.swo
+*.swp
+*.bak
+
+# OS generated files (macOS, Windows)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE / Editor specific configurations (Visual Studio Code example)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Other IDEs/Editors (examples)
+# *.sublime-project
+# *.sublime-workspace
+# .project
+# .classpath
+# .cproject
+# .settings/
+
+# Environment variables (NEVER commit .env files with actual secrets)
+.env
+.env.*
+!.env.example # It's good practice to commit an example env file
+
+# Test runner artifacts
+coverage/
+.nyc_output/
+
+# Build outputs / Bundles
+/dist
+/build
+/public # If your build outputs to public and it's not your source public folder
+
+# Sensitive credential files (examples, be cautious)
+*.jks
+*.p12
+*.key
+*.pem
+*.cer
+*.pfx
+*.mobileprovision
+
+# Logs
+*.log
+logs/

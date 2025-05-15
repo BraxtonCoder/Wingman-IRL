@@ -110,10 +110,20 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     backgroundColor: '#2c2c2c',
   },
+  buttonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   switchText: {
-    color: '#007bff',
+    color: '#ffffff',
     textAlign: 'center',
     marginTop: 20,
+  },
+  toggleText: {
+    marginTop: 15,
+    color: '#ffffff',
+    textAlign: 'center',
   },
 });
 
