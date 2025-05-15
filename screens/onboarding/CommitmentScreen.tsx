@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Button, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, TextInput } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { OnboardingStackParamList, OnboardingData } from '../../navigation/types';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,22 +14,58 @@ const commitmentOptions = [
 ];
 
 const CommitmentScreen = ({ navigation, route }: Props) => {
-  const [selectedCommitment, setSelectedCommitment] = useState<string | null>(null);
-  const initialOnboardingData = route.params.onboardingData; // Should always be provided
+  const [selectedCommitmentValue, setSelectedCommitmentValue] = useState<string | null>(null);
+  const [otherCommitmentText, setOtherCommitmentText] = useState('');
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
+  const initialOnboardingData = route.params.onboardingData;
 
   useEffect(() => {
     if (initialOnboardingData.commitment) {
-      setSelectedCommitment(initialOnboardingData.commitment);
+      const isPredefined = commitmentOptions.some(opt => opt.value === initialOnboardingData.commitment);
+      if (isPredefined) {
+        setSelectedCommitmentValue(initialOnboardingData.commitment);
+        setIsOtherSelected(false);
+      } else if (initialOnboardingData.commitment) { // Custom value was stored
+        setSelectedCommitmentValue('other'); // Conceptually select "Other"
+        setOtherCommitmentText(initialOnboardingData.commitment);
+        setIsOtherSelected(true);
+      }
     }
   }, [initialOnboardingData.commitment]);
 
+  const handleSelectCommitment = (value: string) => {
+    if (value === 'other') {
+      setSelectedCommitmentValue('other'); 
+      setIsOtherSelected(true);
+    } else {
+      setSelectedCommitmentValue(value);
+      setIsOtherSelected(false);
+      setOtherCommitmentText(''); // Clear other text if a predefined option is selected
+    }
+  };
+
   const handleNext = () => {
+    let finalCommitment: string | null = null;
+    if (isOtherSelected && otherCommitmentText.trim()) {
+      finalCommitment = otherCommitmentText.trim();
+    } else if (selectedCommitmentValue && selectedCommitmentValue !== 'other') {
+      finalCommitment = selectedCommitmentValue;
+    }
+    // If 'other' is selected but text is empty, finalCommitment remains null or previous non-other value
+
     const updatedOnboardingData: OnboardingData = {
       ...initialOnboardingData,
-      commitment: selectedCommitment,
+      commitment: finalCommitment,
     };
-    console.log('Final Onboarding Data:', updatedOnboardingData);
+    console.log('Final Onboarding Data from Commitment:', updatedOnboardingData);
     navigation.navigate('Auth', { onboardingData: updatedOnboardingData });
+  };
+  
+  const isNextDisabled = () => {
+    if (isOtherSelected) {
+      return !otherCommitmentText.trim();
+    }
+    return !selectedCommitmentValue;
   };
 
   return (
@@ -47,24 +83,54 @@ const CommitmentScreen = ({ navigation, route }: Props) => {
                 key={option.value}
                 style={[
                   styles.commitmentOption,
-                  selectedCommitment === option.value && styles.commitmentOptionSelected,
+                  selectedCommitmentValue === option.value && !isOtherSelected && styles.commitmentOptionSelected,
                 ]}
-                onPress={() => setSelectedCommitment(option.value)}
+                onPress={() => handleSelectCommitment(option.value)}
               >
                 <Text 
                   style={[
                     styles.commitmentOptionText,
-                    selectedCommitment === option.value && styles.commitmentOptionTextSelected,
+                    selectedCommitmentValue === option.value && !isOtherSelected && styles.commitmentOptionTextSelected,
                   ]}
                 >
                   {option.label}
                 </Text>
               </TouchableOpacity>
             ))}
+            {/* "Other" Button */}
+            <TouchableOpacity
+              key="other"
+              style={[
+                styles.commitmentOption,
+                isOtherSelected && styles.commitmentOptionSelected,
+              ]}
+              onPress={() => handleSelectCommitment('other')}
+            >
+              <Text 
+                style={[
+                  styles.commitmentOptionText,
+                  isOtherSelected && styles.commitmentOptionTextSelected,
+                ]}
+              >
+                Other (Please specify)
+              </Text>
+            </TouchableOpacity>
           </View>
           
+          {isOtherSelected && (
+            <TextInput
+              style={styles.input}
+              placeholder="Describe your commitment level"
+              value={otherCommitmentText}
+              onChangeText={setOtherCommitmentText}
+              placeholderTextColor="#888"
+              multiline
+              returnKeyType="done"
+            />
+          )}
+          
           <View style={styles.buttonContainer}>
-            <Button title="Next" onPress={handleNext} disabled={!selectedCommitment} />
+            <Button title="Next" onPress={handleNext} disabled={isNextDisabled()} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -95,7 +161,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     color: '#cccccc',
-    marginBottom: 15, // Increased margin before options
+    marginBottom: 15,
     alignSelf: 'flex-start',
   },
   commitmentOptionsContainer: {
@@ -124,7 +190,21 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
-  }
+  },
+  input: {
+    backgroundColor: '#2c2c2c',
+    color: '#ffffff',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 20,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: '#444',
+    marginTop: 10,
+  },
 });
 
 export default CommitmentScreen; 

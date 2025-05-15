@@ -4,7 +4,7 @@
     "slug": "WingmanIRL",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/Wingman-IRL-App-Logo.png",
     "scheme": "wingmanirl",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

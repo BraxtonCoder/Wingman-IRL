@@ -16,7 +16,7 @@ const Stack = createStackNavigator<OnboardingStackParamList>();
 
 const OnboardingNavigator = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: 'none' }}>
       <Stack.Screen name="Logo" component={LogoScreen} />
       {/* <Stack.Screen name="OnboardingQuestions" component={OnboardingQuestionsScreen} /> */}
       <Stack.Screen name="GoalScreen" component={GoalScreen} />

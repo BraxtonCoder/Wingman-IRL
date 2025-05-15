@@ -1,75 +1,239 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { Platform, StyleSheet, ScrollView, View, Text, TouchableOpacity, FlatList, Modal, Button } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Calendar, DateData } from 'react-native-calendars';
 
-export default function HomeScreen() {
+// Helper to get day name
+const getDayName = (date: Date): string => {
+  return date.toLocaleDateString('en-US', { weekday: 'short' }); // e.g., Mon, Tue
+};
+
+// Helper to format date
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // e.g., May 19
+}
+
+// Generate some sample dates for now (e.g., today and next 6 days)
+const today = new Date();
+const sampleDates = Array.from({ length: 30 }, (_, i) => {
+  const date = new Date(today);
+  date.setDate(today.getDate() - 15 + i);
+  return {
+    id: date.toISOString().split('T')[0], // 'YYYY-MM-DD'
+    dateObj: date,
+    dayName: getDayName(date),
+    formattedDate: formatDate(date),
+    moves: [i % 4 === 0, i % 3 === 0, i % 5 === 0], // Randomize some initial checks for demo
+  };
+});
+
+type DayData = typeof sampleDates[0];
+type MoveStatus = DayData['moves'];
+
+const DayCard = ({ day, onToggleCheckbox }: { day: DayData, onToggleCheckbox: (dayId: string, moveIndex: number) => void }) => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.dayCard}>
+      <ThemedText style={styles.dayNameText}>{day.dayName}</ThemedText>
+      <ThemedText style={styles.dateText}>{day.formattedDate}</ThemedText>
+      <View style={styles.checkboxContainer}>
+        {day.moves.map((isChecked, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.checkbox}
+            onPress={() => onToggleCheckbox(day.id, index)}
+          >
+            <Ionicons
+              name={isChecked ? 'checkbox-outline' : 'square-outline'}
+              size={30}
+              color={isChecked ? '#4CAF50' : '#888'}
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+};
+
+export default function TrackingScreen() {
+  const [daysData, setDaysData] = useState<DayData[]>(sampleDates);
+  const [showMonthlyCalendar, setShowMonthlyCalendar] = useState(false);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string>(today.toISOString().split('T')[0]);
+
+  const handleToggleCheckbox = (dayId: string, moveIndex: number) => {
+    setDaysData(prevDaysData =>
+      prevDaysData.map(day => {
+        if (day.id === dayId) {
+          const newMoves = [...day.moves] as MoveStatus;
+          newMoves[moveIndex] = !newMoves[moveIndex];
+          return { ...day, moves: newMoves };
+        }
+        return day;
+      })
+    );
+  };
+
+  const markedDatesForCalendar = useMemo(() => {
+    const marks: { [key: string]: any } = {};
+    daysData.forEach(day => {
+      const allMovesDone = day.moves.every(move => move === true);
+      if (allMovesDone) {
+        marks[day.id] = { marked: true, dotColor: '#4CAF50', selected: day.id === selectedCalendarDate, selectedColor: day.id === selectedCalendarDate ? '#007AFF' : '#4CAF50' };
+      } else if (day.moves.some(move => move === true)) {
+        marks[day.id] = { marked: true, dotColor: '#FFC107', selected: day.id === selectedCalendarDate, selectedColor: '#007AFF' }; // Yellow if some moves done
+      } else {
+        if (day.id === selectedCalendarDate) {
+            marks[day.id] = {selected: true, selectedColor: '#007AFF'};
+        }
+      }
+    });
+    return marks;
+  }, [daysData, selectedCalendarDate]);
+
+  const onDayPress = (day: DateData) => {
+    setSelectedCalendarDate(day.dateString);
+    // Optional: Close modal on day press or navigate daily scroller
+    // setShowMonthlyCalendar(false);
+  };
+
+  return (
+    <ThemedView style={styles.container}>
+      {/* Placeholder for the "I commit to..." and "Tree: Stage X" if they are above the scroller */}
+      <View style={styles.headerContentPlaceholder}>
+        <ThemedText>Your Pledge / Tree Stage Area</ThemedText>
+      </View>
+      
+      <View style={styles.dailyScrollViewContainer}>
+        <FlatList
+          horizontal
+          data={daysData}
+          renderItem={({ item }) => <DayCard day={item} onToggleCheckbox={handleToggleCheckbox} />}
+          keyExtractor={item => item.id}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.flatListContentContainer}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+
+      {/* Placeholder for Total Moves */}
+      <View style={styles.totalMovesPlaceholder}>
+        <ThemedText>Total Moves: X</ThemedText>
+      </View>
+      
+      {/* Placeholder for future monthly calendar toggle/view */}
+      <View style={styles.monthlyCalendarTogglePlaceholder}>
+        <TouchableOpacity onPress={() => setShowMonthlyCalendar(true)}>
+            <ThemedText style={{color: '#007AFF', fontSize: 16}}>View Monthly Calendar</ThemedText>
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={showMonthlyCalendar}
+        onRequestClose={() => {
+          setShowMonthlyCalendar(false);
+        }}
+      >
+        <ThemedView style={styles.modalView}>
+          <Calendar
+            current={selectedCalendarDate}
+            onDayPress={onDayPress}
+            markedDates={markedDatesForCalendar}
+            theme={{
+              backgroundColor: '#1C1C1E',
+              calendarBackground: '#1C1C1E',
+              textSectionTitleColor: '#FFFFFF',
+              selectedDayBackgroundColor: '#007AFF',
+              selectedDayTextColor: '#ffffff',
+              todayTextColor: '#00adf5',
+              dayTextColor: '#FFFFFF',
+              textDisabledColor: '#555555',
+              dotColor: '#00adf5',
+              selectedDotColor: '#ffffff',
+              arrowColor: '#007AFF',
+              monthTextColor: '#FFFFFF',
+              indicatorColor: 'blue',
+              textDayFontWeight: '300',
+              textMonthFontWeight: 'bold',
+              textDayHeaderFontWeight: '300',
+              textDayFontSize: 16,
+              textMonthFontSize: 18,
+              textDayHeaderFontSize: 14
+            }}
+          />
+          <Button title="Close Calendar" onPress={() => setShowMonthlyCalendar(false)} color={Platform.OS === 'ios' ? '#007AFF' : undefined} />
+        </ThemedView>
+      </Modal>
+
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? 25 : 20, // Basic status bar handling
+  },
+  headerContentPlaceholder: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     alignItems: 'center',
-    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+    marginTop: Platform.OS === 'android' ? 25 : 40, // Adjust for status bar if not using SafeAreaView for the whole screen
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  dailyScrollViewContainer: {
+    height: 150, // Adjust as needed for DayCard size
+    marginTop: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  flatListContentContainer: {
+    paddingHorizontal: 8, // Padding for the start and end of the list
+  },
+  dayCard: {
+    width: 110, // Fixed width for each day card
+    height: '100%',
+    padding: 10,
+    marginHorizontal: 5,
+    backgroundColor: '#2C2C2E', // Dark card background
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  dayNameText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#AAAAAA',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 10,
+  },
+  checkbox: {
+    padding: 5,
+  },
+  totalMovesPlaceholder: {
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+    marginTop: 10,
+  },
+  monthlyCalendarTogglePlaceholder: {
+    alignItems: 'center',
+    paddingVertical: 15,
+  },
+  modalView: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? 25 : 50, // Adjust for status bar inside modal
+    backgroundColor: '#1C1C1E', // Match app theme
   },
 });

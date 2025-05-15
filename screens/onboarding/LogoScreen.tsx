@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Image } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { OnboardingStackParamList } from '../../navigation/types';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +18,10 @@ const LogoScreen = ({ navigation }: Props) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.logoText}>Wingman IRL</Text>
+        <Image 
+          source={require('../../assets/images/logo.png')} 
+          style={styles.logoImage} 
+        />
         <Text style={styles.tagline}>Master the first move</Text>
         
         <TouchableOpacity 
@@ -44,11 +47,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20, // Add padding if needed within the safe area
   },
-  logoText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: 10,
+  logoImage: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+    marginBottom: 20,
   },
   tagline: {
     fontSize: 20,

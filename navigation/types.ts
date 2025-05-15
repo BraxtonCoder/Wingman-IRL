@@ -1,6 +1,6 @@
 export type OnboardingData = {
-  goals?: string; // Mark as optional as they are collected sequentially
-  challenges?: string;
+  goals?: string[] | string; // Changed to allow string array or single string for flexibility, or undefined
+  challenges?: string[] | string; // Changed to allow string array or single string
   commitment?: string | null;
 };
 
