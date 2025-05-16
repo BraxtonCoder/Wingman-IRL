@@ -8,23 +8,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type Props = StackScreenProps<OnboardingStackParamList, 'Auth'>;
 
 const AuthScreen = ({ navigation, route }: Props) => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  // const [confirmPassword, setConfirmPassword] = useState(''); // For sign-up
+  // const [isLogin, setIsLogin] = useState(true); // Removed as we now have combined social login
+  // const [email, setEmail] = useState(''); // Removed
+  // const [password, setPassword] = useState(''); // Removed
+  // const [confirmPassword, setConfirmPassword] = useState(''); // For sign-up // Removed
 
   const onboardingData = route.params?.onboardingData;
 
-  const handleAuth = () => {
-    if (isLogin) {
-      console.log('Attempting login with:', email, password);
-      // TODO: Implement Firebase Login
-    } else {
-      console.log('Attempting sign-up with:', email, password);
-      // TODO: Implement Firebase Sign-up
-    }
+  const handleGoogleSignIn = () => {
+    console.log('Attempting Google Sign-In');
+    // TODO: Implement Firebase Google Sign-In
     // Simulate successful auth for navigation
-    navigation.navigate('Paywall', { onboardingData }); 
+    navigation.navigate('Paywall', { onboardingData });
+  };
+
+  const handleAppleSignIn = () => {
+    console.log('Attempting Apple Sign-In');
+    // TODO: Implement Firebase Apple Sign-In
+    // Simulate successful auth for navigation
+    navigation.navigate('Paywall', { onboardingData });
   };
 
   return (
@@ -35,40 +37,17 @@ const AuthScreen = ({ navigation, route }: Props) => {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.title}>{isLogin ? 'Login' : 'Sign Up'}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholderTextColor="#888"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor="#888"
-        />
-        {!isLogin && (
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            // value={confirmPassword}
-            // onChangeText={setConfirmPassword}
-            secureTextEntry
-            placeholderTextColor="#888"
-          />
-        )}
-        <Button title={isLogin ? 'Login' : 'Create Account'} onPress={handleAuth} />
-        <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-          <Text style={styles.switchText}>
-            {isLogin ? 'Need an account? Sign Up' : 'Have an account? Login'}
-          </Text>
+        <Text style={styles.title}>Create Account / Sign In</Text>
+        {/* Email and Password inputs removed */}
+
+        <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignIn}>
+          <Text style={styles.socialButtonText}>Continue with Google</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.socialButton} onPress={handleAppleSignIn}>
+          <Text style={styles.socialButtonText}>Continue with Apple</Text>
+        </TouchableOpacity>
+
+        {/* Auth toggle and main auth button removed */}
       </View>
     </SafeAreaView>
   );
@@ -98,33 +77,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 30,
   },
-  input: {
+  // input styles removed as inputs are gone
+  socialButton: {
     width: '100%',
     height: 50,
-    borderColor: '#444',
-    borderWidth: 1,
+    backgroundColor: '#4285F4', // Example Google blue, can be customized
     borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 15,
-    paddingHorizontal: 15,
-    fontSize: 16,
+  },
+  socialButtonText: {
     color: '#ffffff',
-    backgroundColor: '#2c2c2c',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  switchText: {
-    color: '#ffffff',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  toggleText: {
-    marginTop: 15,
-    color: '#ffffff',
-    textAlign: 'center',
-  },
+  // switchText and toggleText styles removed as the toggle is gone
 });
 
 export default AuthScreen; 

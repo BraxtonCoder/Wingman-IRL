@@ -5,6 +5,9 @@ import { TrackingStackParamList } from '../../navigation/types';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Calendar, DateData, LocaleConfig } from 'react-native-calendars';
 
+// Define the possible states for a check item
+type CheckState = null | 'success' | 'redirection';
+
 // LocaleConfig setup (assuming it's correctly placed and you want to keep it)
 // If not, this block can be removed if default locale is fine.
 LocaleConfig.locales['en'] = {
@@ -89,18 +92,23 @@ interface Props {
 const TrackingScreen = ({ navigation }: Props) => {
   const [firstMoveCount, setFirstMoveCount] = useState(0);
   const [userPledge, setUserPledge] = useState("I commit to making the first move daily.");
-  const [check1, setCheck1] = useState(false);
-  const [check2, setCheck2] = useState(false);
-  const [check3, setCheck3] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string>(''); // Initialize as empty, will be set in useEffect
+  
+  // Updated check states
+  const [check1, setCheck1] = useState<CheckState>(null);
+  const [check2, setCheck2] = useState<CheckState>(null);
+  const [check3, setCheck3] = useState<CheckState>(null);
+  
+  const [nextCheckIndex, setNextCheckIndex] = useState(0); // 0 for check1, 1 for check2, 2 for check3
+
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [markedDates, setMarkedDates] = useState<{[date: string]: any}>({});
 
-  const dailyChecksCompleted = [check1, check2, check3].filter(Boolean).length;
+  // Calculate daily success based on 'success' state
+  const dailySuccesses = [check1, check2, check3].filter(status => status === 'success').length;
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setSelectedDate(today);
-    // Initial marking for today - will be further processed by the next useEffect
     setMarkedDates(prev => ({
       ...prev,
       [today]: { 
@@ -110,7 +118,12 @@ const TrackingScreen = ({ navigation }: Props) => {
         disableTouchEvent: true 
       }
     }));
-    // TODO: Load actual check states for `today` or `selectedDate` from Firestore
+    // TODO: Load actual check states (null, 'success', 'redirection') and nextCheckIndex for `today` or `selectedDate` from Firestore
+    // For now, we reset on component mount, assuming it's for 'today'
+    setCheck1(null);
+    setCheck2(null);
+    setCheck3(null);
+    setNextCheckIndex(0);
   }, []);
 
   useEffect(() => {
@@ -118,73 +131,99 @@ const TrackingScreen = ({ navigation }: Props) => {
 
     setMarkedDates(prevMarkedDates => {
       const newMarkedDates = { ...prevMarkedDates };
-      // Make a mutable copy of the specific day's marking or initialize if not present
       const dayMarking = { ...(newMarkedDates[selectedDate] || {}) };
 
-      // Always ensure the currently selected date has selection styling
       dayMarking.selected = true;
-      dayMarking.selectedColor = '#ffffff'; // Standard selection color
+      dayMarking.selectedColor = '#ffffff';
       dayMarking.disableTouchEvent = true;
 
-      // Handle completion-specific marking (green dot)
-      if (dailyChecksCompleted === 3) {
-        dayMarking.marked = true; // This flag tells the calendar to look for dot/custom marking
-        dayMarking.dotColor = '#4CAF50'; // Our specific green dot
+      // Green dot for 3 SUCCESSES
+      if (dailySuccesses === 3) {
+        dayMarking.marked = true;
+        dayMarking.dotColor = '#4CAF50';
       } else {
-        // Not completed (0, 1, or 2 checks)
-        // If it was previously marked as complete (had our green dot)
         if (dayMarking.dotColor === '#4CAF50') {
-          delete dayMarking.dotColor; // Remove our specific dot color
-          // If 'marked' was true because of our dot, set it to false.
-          // This prevents a default dot if 'marked' remains true without a dotColor.
+          delete dayMarking.dotColor;
           dayMarking.marked = false; 
         }
       }
       
-      newMarkedDates[selectedDate] = dayMarking; // Update the map with the modified day marking
+      newMarkedDates[selectedDate] = dayMarking;
       return newMarkedDates;
     });
-  }, [dailyChecksCompleted, selectedDate]);
+  }, [dailySuccesses, selectedDate]);
 
-  const handleCheckToggle = (checkNumber: number) => {
-    let currentCheckState = false;
-    if (checkNumber === 1) currentCheckState = check1;
-    else if (checkNumber === 2) currentCheckState = check2;
-    else if (checkNumber === 3) currentCheckState = check3;
+  const updateCheckState = (status: 'success' | 'redirection') => {
+    if (nextCheckIndex >= 3) return; // All checks done for the day
 
-    if (checkNumber === 1) setCheck1(!check1);
-    else if (checkNumber === 2) setCheck2(!check2);
-    else if (checkNumber === 3) setCheck3(!check3);
-    
-    // TODO: Update Firestore with the new check states for the selectedDate
-    // TODO: Update firstMoveCount logic based on persisted data and new moves
+    const newCheckStates: CheckState[] = [check1, check2, check3];
+    newCheckStates[nextCheckIndex] = status;
+
+    if (nextCheckIndex === 0) setCheck1(status);
+    else if (nextCheckIndex === 1) setCheck2(status);
+    else if (nextCheckIndex === 2) setCheck3(status);
+
+    if (status === 'success') {
+      setFirstMoveCount(prevCount => prevCount + 1);
+      // TODO: Update Firestore with the new check states and firstMoveCount
+    } else {
+      // TODO: Update Firestore with 'redirection' state
+    }
+    setNextCheckIndex(prevIndex => prevIndex + 1);
+  };
+
+  const handleSuccessPress = () => {
+    updateCheckState('success');
+  };
+
+  const handleRedirectionPress = () => {
+    updateCheckState('redirection');
+  };
+
+  const handleCheckboxReset = (checkIndexToReset: number) => {
+    let currentStatus: CheckState = null;
+    if (checkIndexToReset === 0) currentStatus = check1;
+    else if (checkIndexToReset === 1) currentStatus = check2;
+    else if (checkIndexToReset === 2) currentStatus = check3;
+
+    // Only proceed if the box was actually filled (not null)
+    if (currentStatus !== null) {
+      if (currentStatus === 'success') {
+        setFirstMoveCount(prevCount => Math.max(0, prevCount - 1)); // Ensure count doesn't go below 0
+      }
+
+      if (checkIndexToReset === 0) setCheck1(null);
+      else if (checkIndexToReset === 1) setCheck2(null);
+      else if (checkIndexToReset === 2) setCheck3(null);
+      
+      // IMPORTANT: Set nextCheckIndex to the reset checkbox index
+      // so the Success/Redirection buttons target this box next.
+      setNextCheckIndex(checkIndexToReset);
+
+      // TODO: Update Firestore with the reset state, adjusted firstMoveCount, and new nextCheckIndex
+    }
+    // If currentStatus was already null, tapping it does nothing.
   };
 
   const onDayPress = (day: DateData) => {
     const newSelectedDate = day.dateString;
-    setSelectedDate(newSelectedDate); // Update selectedDate first
+    setSelectedDate(newSelectedDate);
 
-    // TODO: Load check states for the newly selected newSelectedDate from Firestore.
-    // For now, the global check states and dailyChecksCompleted will apply.
-    // Example: if (checksAreDateSpecific) { setCheck1(loadedChecks[0]); ... }
+    // Reset checks for the new day - Placeholder for loading data from Firestore
+    setCheck1(null);
+    setCheck2(null);
+    setCheck3(null);
+    setNextCheckIndex(0);
+    // TODO: Load check states (null, 'success', 'redirection') and nextCheckIndex for newSelectedDate from Firestore.
 
     setMarkedDates(prev => {
       const updatedMarks = { ...prev };
-      
-      // Deselect previously selected day by removing 'selected' and 'selectedColor'
-      // Keep other properties like 'dotColor' or 'marked'
       Object.keys(updatedMarks).forEach(dateKey => {
         if (updatedMarks[dateKey]?.selected && dateKey !== newSelectedDate) {
-          // updatedMarks[dateKey].selected = false;
-          // delete updatedMarks[dateKey].selectedColor; 
-          // A simpler way: create a new object without selection properties
           const {selected, selectedColor, ...rest} = updatedMarks[dateKey];
           updatedMarks[dateKey] = rest;
-
         }
       });
-      
-      // Mark the new day as selected, preserving other properties like completion dot
       const currentMarkingForNewDay = updatedMarks[newSelectedDate] || {};
       updatedMarks[newSelectedDate] = {
         ...currentMarkingForNewDay,
@@ -196,27 +235,56 @@ const TrackingScreen = ({ navigation }: Props) => {
     });
   };
   
-  const CheckboxItem = ({ label, checked, onPress }: { label: string, checked: boolean, onPress: () => void }) => (
-    <TouchableOpacity onPress={onPress} style={styles.checkboxItemContainer}>
-      <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={24} color={checked ? '#4CAF50' : '#cccccc'} />
-      <Text style={[styles.checkboxLabel, checked && styles.checkboxLabelChecked]}>{label}</Text>
-    </TouchableOpacity>
-  );
+  // Updated CheckboxItem to display status and handle reset onPress
+  const CheckboxItem = ({ status, onPress }: { status: CheckState, onPress: () => void }) => {
+    let iconName: keyof typeof Ionicons.glyphMap = 'ellipse-outline';
+    let iconColor = '#cccccc';
+
+    if (status === 'success') {
+      iconName = 'checkmark-circle';
+      iconColor = '#4CAF50'; // Green for success
+    } else if (status === 'redirection') {
+      iconName = 'close-circle-outline'; 
+      iconColor = '#FF9500'; 
+    }
+
+    return (
+      <TouchableOpacity onPress={onPress} style={styles.checkboxItemContainer}>
+        <Ionicons name={iconName} size={30} color={iconColor} />
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.screenContainer}>
       <View style={styles.pageContainer}>
         <Text style={styles.pledgeText} numberOfLines={1} ellipsizeMode="tail">{userPledge}</Text>
 
-        <GrowthTree totalMoves={firstMoveCount} dailyChecksCompleted={dailyChecksCompleted} />
+        <GrowthTree totalMoves={firstMoveCount} dailyChecksCompleted={dailySuccesses} />
 
         <View style={styles.trackingSection}>
-          <ProgressBar progress={dailyChecksCompleted} />
+          <ProgressBar progress={dailySuccesses} />
           <Text style={styles.trackingTitle}>Moves for {selectedDate === new Date().toISOString().split('T')[0] ? 'Today' : selectedDate}</Text>
           <View style={styles.checkboxesRow}>
-            <CheckboxItem label="1st" checked={check1} onPress={() => handleCheckToggle(1)} />
-            <CheckboxItem label="2nd" checked={check2} onPress={() => handleCheckToggle(2)} />
-            <CheckboxItem label="3rd" checked={check3} onPress={() => handleCheckToggle(3)} />
+            <CheckboxItem status={check1} onPress={() => handleCheckboxReset(0)} />
+            <CheckboxItem status={check2} onPress={() => handleCheckboxReset(1)} />
+            <CheckboxItem status={check3} onPress={() => handleCheckboxReset(2)} />
+          </View>
+          <View style={styles.actionButtonsRow}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.successButton]} 
+              onPress={handleSuccessPress}
+              disabled={nextCheckIndex >= 3}
+            >
+              <Text style={styles.actionButtonText}>Success</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.redirectionButton]} 
+              onPress={handleRedirectionPress}
+              disabled={nextCheckIndex >= 3}
+            >
+              <Text style={styles.actionButtonText}>Redirection</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -333,18 +401,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+    marginBottom: 15, // Added margin to separate checkboxes from new buttons
   },
   checkboxItemContainer: { 
     alignItems: 'center',
     paddingHorizontal: 4,
-  },
-  checkboxLabel: {
-    fontSize: 11, // Slightly smaller
-    color: '#cccccc',
-    marginTop: 2, 
-  },
-  checkboxLabelChecked: {
-    color: '#5cb85c',
+    minWidth: 40, // Added to give icons some breathing room
   },
   totalCountText: {
     fontSize: 13, 
@@ -371,6 +433,31 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#4CAF50',
     borderRadius: 5,
+  },
+  actionButtonsRow: { // New style for the row of action buttons
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    marginHorizontal: 5, // Give some horizontal margin
+  },
+  actionButton: { // New style for individual action buttons
+    flex: 1, // Make buttons take equal width
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5, // Space between buttons
+  },
+  successButton: { // Specific style for success button
+    backgroundColor: '#4CAF50', // Green
+  },
+  redirectionButton: { // Specific style for redirection button
+    backgroundColor: '#FF9500', // Orange
+  },
+  actionButtonText: { // Style for text inside action buttons
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
